@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "NeoShowdown",
+  "version": "1.0",
+  "description": "Add NeoPaste features to Pokémon Showdown",
+  "permissions": [
+    "activeTab",
+    "clipboardWrite",
+    "scripting"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://play.pokemonshowdown.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
