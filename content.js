@@ -1,3 +1,4 @@
+// content.js
 function buildExportTextFromDOM() {
   let text = '';
 
@@ -161,3 +162,192 @@ const observer = new MutationObserver(() => {
   createNeoPasteButton();
 });
 observer.observe(document.body, { childList: true, subtree: true });
+
+function waitForJQuery(callback) {
+  if (typeof window.$ === 'function') {
+    callback();
+  } else {
+    setTimeout(() => waitForJQuery(callback), 50);
+  }
+}
+
+function injectScriptFile(filePath) {
+  const script = document.createElement('script');
+  script.src = chrome.runtime.getURL(filePath);
+  script.type = 'text/javascript';
+  script.onload = () => script.remove();
+  document.documentElement.appendChild(script);
+}
+
+// Inject the page-context script (required for modifying window.setdex)
+injectScriptFile('injected.js');
+
+(function () {
+  try {
+    const isNeoPasteViewer =
+      window.location.hostname === 'izyawastaken.github.io' ||
+      (window.location.protocol === 'file:' &&
+        window.location.pathname.replace(/\\/g, '/').toLowerCase().endsWith('/projects/neo-showdown/view.html'));
+    if (isNeoPasteViewer) {
+      const meta = document.createElement('meta');
+      meta.name = 'neoShowdownExtPresent';
+      meta.content = 'true';
+      document.head.appendChild(meta);
+    }
+  } catch (e) {}
+})();
+
+(function () {
+  if (window.location.hostname !== 'calc.pokemonshowdown.com') return;
+
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('neopaste');
+  if (!token) return;
+
+  fetch(`https://neocalc.agastyawastaken.workers.dev/get?token=${encodeURIComponent(token)}`)
+    .then(res => res.ok ? res.text() : Promise.reject('Not found'))
+    .then(setText => {
+      console.log('✅ Fetched NeoPaste: ', setText);
+
+      const lines = setText.split('\n').map(l => l.trim()).filter(l => l); 
+      const speciesLine = lines[0] || '';
+      const abilityLine = lines.find(l => l.startsWith('Ability:')) || '';
+      const teraLine = lines.find(l => l.startsWith('Tera Type:')) || '';
+      const evLine = lines.find(l => l.startsWith('EVs:')) || '';
+      const ivLine = lines.find(l => l.startsWith('IVs:')) || '';
+      const ivs = { hp: 31, at: 31, df: 31, sa: 31, sd: 31, sp: 31 };
+      if (ivLine) {
+        ivLine.replace('IVs:', '').trim().split('/').forEach(iv => {
+        const [num, stat] = iv.trim().split(' ');
+      const map = {HP: 'hp', Atk: 'at', Def: 'df', SpA: 'sa', SpD: 'sd', Spe: 'sp'};
+      if (map[stat]) ivs[map[stat]] = parseInt(num);
+    });
+  }
+
+      const natureLine = lines.find(l => l.includes('Nature')) || '';
+      const moves = lines.filter(l => l.startsWith('- ')).map(l => l.slice(2));
+
+      const [speciesPart, itemPart] = speciesLine.split('@').map(s => s.trim());
+      const species = speciesPart || 'Unknown';
+      const item = itemPart || '';
+
+      const ability = abilityLine.replace('Ability:', '').trim();
+      const teraType = teraLine.replace('Tera Type:', '').trim();
+      const nature = natureLine.replace('Nature', '').replace('Nature:', '').trim();
+
+      const evs = { hp: 0, at: 0, df: 0, sa: 0, sd: 0, sp: 0 };
+      if (evLine) {
+        evLine.replace('EVs:', '').trim().split('/').forEach(ev => {
+          const [num, stat] = ev.trim().split(' ');
+          const map = {
+            HP: 'hp', Atk: 'at', Def: 'df', SpA: 'sa', SpD: 'sd', Spe: 'sp'
+          };
+          if (map[stat]) evs[map[stat]] = parseInt(num);
+          
+        });
+      }
+      
+
+      // Send data to injected.js via postMessage
+      const command = `window.setdex['${species}'] = {
+        'setName': {
+          ability: ${JSON.stringify(ability)},
+          item: ${JSON.stringify(item)},
+          teraType: ${JSON.stringify(teraType)},
+          nature: ${JSON.stringify(nature)},
+          evs: ${JSON.stringify(evs)},
+          ivs: ${JSON.stringify(ivs)},
+          moves: ${JSON.stringify(moves)}
+        }
+      };`;
+
+      window.postMessage({
+        source: 'neopaste-extension',
+        evalString: command
+      }, '*');
+      window.postMessage({
+        source: 'neopaste-extension',
+        payload: {
+          species,
+          ability,
+          item,
+          teraType,
+          nature,
+          evs,
+          ivs,
+          moves
+        }
+      }, '*');
+      
+
+      function waitForElement(selector, callback, timeout = 5000) {
+        const startTime = Date.now();
+        function check() {
+          if ($(selector).length > 0) callback();
+          else if (Date.now() - startTime < timeout) setTimeout(check, 100);
+          else console.error('Element not found:', selector);
+        }
+        check();
+      }
+      waitForJQuery(() => {
+        waitForElement('#p1 .set-selector', () => {
+          if (typeof window.updateDex === 'function') {
+            window.updateDex();
+          }
+      
+          // Wait a bit for updateDex to finish updating the dropdown
+          setTimeout(() => {
+            const setName = 'NeoPaste Set';
+            const optionValue = `${species} (${setName})`;
+
+            const $select = $('#p1 .set-selector');
+      
+            const optionExists = $select.find(`option[value="${optionValue}"]`).length > 0;
+            if (!optionExists) {
+              console.error('❌ Set not found in dropdown:', optionValue);
+              console.log('Available options:', $select.find('option').map((_, o) => o.value).get());
+              return;
+            }
+      
+            // Ensure Select2 is initialized and use correct API
+            if ($select.data('select2')) {
+              $select.select2('val', optionValue);
+            } else {
+              $select.val(optionValue).trigger('change');
+            }
+      
+            // Optional: Manually update the visible label if needed
+            const container = $select.closest('.select2-container');
+            if (container.length) {
+              container.find('.select2-chosen').text(optionValue);
+            }
+      
+            // Call Showdown functions to fully apply the change
+            if (typeof window.loadSet === 'function') {
+              window.loadSet('p1', species, 'setName');
+            }
+            if (typeof window.onSetChange === 'function') {
+              window.onSetChange('p1');
+            }
+      
+            // Set gender
+            $('#p1 .gender').val('Female').trigger('change');
+      
+            // Recalculate stats
+            if (typeof performCalculations === 'function') {
+              performCalculations();
+            }
+      
+            console.log('✅ Selected and applied set:', optionValue);
+      
+            // Copy full NeoPaste to clipboard
+            if (navigator.clipboard?.writeText) {
+              navigator.clipboard.writeText(setText).then(() => {
+                console.log('✅ Copied to clipboard too');
+              });
+            }
+          }, 300); // Give enough time for dropdown update
+        });
+      });
+    });
+})(); 
