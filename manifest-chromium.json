@@ -5,8 +5,12 @@
   "description": "Add NeoPaste features to Pokémon Showdown and Pokemon Showdown Calculator.",
   "permissions": [
     "activeTab",
-    "clipboardWrite",
-    "scripting"
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "https://play.pokemonshowdown.com/*",
+    "https://izyawastaken.github.io/NeoPaste/view.html?id=*",
+    "https://calc.pokemonshowdown.com/*"
   ],
   "content_scripts": [
     {

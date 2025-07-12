@@ -36,6 +36,16 @@ function buildExportTextFromDOM() {
       }
     });
 
+    let isShiny = false;
+set.querySelectorAll('.detailcell').forEach(cell => {
+  const label = cell.querySelector('label')?.textContent.trim();
+  if (label === 'Shiny') {
+    const value = cell.textContent.replace('Shiny', '').trim();
+    isShiny = value.toLowerCase() === 'yes';
+  }
+});
+
+
     let plus = '';
     let minus = '';
     set.querySelectorAll('.statrow').forEach(row => {
@@ -72,6 +82,7 @@ function buildExportTextFromDOM() {
 
     text += `${nickname ? nickname + ' ' : ''}${pokemon} @ ${item}\n`;
     text += `Ability: ${ability}\n`;
+    if (isShiny) text += `Shiny: Yes\n`;
     if (teraType) text += `Tera Type: ${teraType}\n`;
     if (evParts.length) text += `EVs: ${evParts.join(' / ')}\n`;
     if (nature) text += `${nature} Nature\n`;
