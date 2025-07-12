@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "NeoShowdown",
-  "version": "3.0W",
+  "version": "3.1",
   "description": "Add NeoPaste features to Pokémon Showdown and the Pokémon Showdown Calculator.",
   "permissions": [
     "activeTab",
