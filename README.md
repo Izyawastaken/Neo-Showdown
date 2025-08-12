@@ -13,7 +13,7 @@ It adds compatability between the teambuilder and my project Neopaste.
 
 ##  How To Install (Unpacked)
 
-1. Download [Neo-Showdown-v2.zip](https://github.com/Izyawastaken/Neo-Showdown/blob/main/Neo-Showdown-v2.zip)
+1. Download [Neo-Showdown-v3.zip](https://github.com/Izyawastaken/Neo-Showdown/blob/main/Neo-Showdown-3.1-Chromium.zip)
 2. Go to `chrome://extensions` in your Chrome browser.
 3. Enable **Developer Mode** in the top right.
 4. Drag and drop the [Neo-Showdown-v2.zip](https://github.com/Izyawastaken/Neo-Showdown/blob/main/Neo-Showdown-v2.zip)
