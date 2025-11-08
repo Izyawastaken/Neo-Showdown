@@ -139,7 +139,7 @@ function createPokeShareButton() {
         return;
       }
 
-      const pasteUrl = `https://izyawastaken.github.io/PokeShare/view.html?id=${id}`;
+      const pasteUrl = `https://pokeshares.vercel.app/view.html?id=${id}`;
       await navigator.clipboard.writeText(pasteUrl);
       console.log(`✅ Uploaded & link copied: ${pasteUrl}`);
       window.open(pasteUrl, '_blank');

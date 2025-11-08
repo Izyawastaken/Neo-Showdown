@@ -16,6 +16,7 @@
     "https://play.pokemonshowdown.com/*",
     "https://izyawastaken.github.io/NeoPaste/*",
     "https://izyawastaken.github.io/PokeShare/*",
+    "https://pokeshares.vercel.app/*",
     "https://*.vercel.app/*",
     "https://calc.pokemonshowdown.com/*",
     "https://*.agastyawastaken.workers.dev/*"
@@ -26,6 +27,7 @@
         "https://play.pokemonshowdown.com/*",
         "https://izyawastaken.github.io/NeoPaste/*",
         "https://izyawastaken.github.io/PokeShare/*",
+        "https://pokeshares.vercel.app/*",
         "https://*.vercel.app/*",
         "https://calc.pokemonshowdown.com/*"
       ],
