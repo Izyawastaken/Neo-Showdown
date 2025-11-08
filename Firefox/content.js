@@ -216,7 +216,10 @@ injectScriptFile('injected.js');
   if (window.location.hostname !== 'calc.pokemonshowdown.com') return;
 
   const params = new URLSearchParams(window.location.search);
-  const token = params.get('neopaste');
+  const neoPasteToken = params.get('neopaste');
+  const pokeShareToken = params.get('pokeShare');
+  const token = neoPasteToken || pokeShareToken;
+  const source = neoPasteToken ? 'NeoPaste' : 'PokeShare';
   if (!token) return;
 
   fetch(`https://neocalc.agastyawastaken.workers.dev/get?token=${encodeURIComponent(token)}`)
@@ -282,6 +285,7 @@ injectScriptFile('injected.js');
       }, '*');
       window.postMessage({
         source: 'neopaste-extension',
+        setSource: source,
         payload: {
           species,
           ability,
@@ -312,7 +316,7 @@ injectScriptFile('injected.js');
       
           // Wait a bit for updateDex to finish updating the dropdown
           setTimeout(() => {
-            const setName = 'NeoPaste Set';
+            const setName = `${source} Set`;
             const optionValue = `${species} (${setName})`;
 
             const $select = $('#p1 .set-selector');

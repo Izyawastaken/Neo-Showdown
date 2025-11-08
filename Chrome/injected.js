@@ -15,17 +15,19 @@ window.addEventListener('message', function (event) {
 
   if (event.data.payload) {
     const data = event.data.payload;
+    const setSource = event.data.setSource || 'NeoPaste';
 
     // ✅ Extract gender and strip from species
     const genderMatch = data.species.match(/\((M|F)\)$/);
     const gender = genderMatch ? genderMatch[1] : null;
     const baseSpecies = data.species.replace(/\s*\((M|F)\)$/, '').trim();
-    const optionValue = `${baseSpecies} (NeoPaste Set)`;
+    const setName = `${setSource} Set`;
+    const optionValue = `${baseSpecies} (${setName})`;
 
     try {
       if (!window.setdex) window.setdex = {};
       if (!window.setdex[baseSpecies]) window.setdex[baseSpecies] = {};
-      window.setdex[baseSpecies]['NeoPaste Set'] = {
+      window.setdex[baseSpecies][setName] = {
         ability: data.ability,
         item: data.item,
         teraType: data.teraType,
