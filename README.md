@@ -19,7 +19,7 @@ It adds compatability between the teambuilder and my project PokeShare! , Neopas
 4. Drag and drop the [Neo-Showdown.zip](https://github.com/Izyawastaken/Neo-Showdown/blob/main/Neo-Showdown-v2.zip)
 5. Visit [Pokémon Showdown](https://play.pokemonshowdown.com/) and open the Teambuilder.
 6. You’ll see the new **Upload to NeoPaste** button next to the existing **Upload to PokePaste** button.
-##### Note - if you can't find the button it's loacated in [teambuilder](https://play.pokemonshowdown.com/teambuilder) select a team and scroll to the very bottom. There you'll fine upload to pokepaste and neopaste!
+##### Note - if you can't find the button it's loacated in [teambuilder](https://play.pokemonshowdown.com/teambuilder) select a team and scroll to the very bottom. There you'll fine upload to pokepaste and PokeShare!
 
 ##  Author
 
