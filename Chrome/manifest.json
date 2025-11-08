@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "NeoShowdown",
-  "version": "3.2",
-  "description": "Add NeoPaste and PokeShare features to Pokémon Showdown and Pokemon Showdown Calculator.",
+  "version": "4.0",
+  "description": "Add PokeShare features to Pokémon Showdown and Pokemon Showdown Calculator.",
   "permissions": [
     "activeTab",
     "clipboardWrite"
@@ -12,7 +12,8 @@
     "https://izyawastaken.github.io/NeoPaste/*",
     "https://izyawastaken.github.io/PokeShare/*",
     "https://*.vercel.app/*",
-    "https://calc.pokemonshowdown.com/*"
+    "https://calc.pokemonshowdown.com/*",
+    "https://*.agastyawastaken.workers.dev/*"
   ],
   "content_scripts": [
     {
@@ -30,7 +31,10 @@
   "web_accessible_resources": [
     {
       "resources": ["injected.js"],
-      "matches": ["https://calc.pokemonshowdown.com/*"]
+      "matches": [
+        "https://calc.pokemonshowdown.com/*",
+        "https://play.pokemonshowdown.com/*"
+      ]
     }
   ]
 }

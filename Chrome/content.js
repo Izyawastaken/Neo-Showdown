@@ -93,36 +93,40 @@ set.querySelectorAll('.detailcell').forEach(cell => {
   return text.trim();
 }
 
-function createNeoPasteButton() {
-  if (document.getElementById('neopaste-export-button')) return;
+function createPokeShareButton() {
+  if (document.getElementById('pokeshare-export-button')) return;
 
   const pokePasteButton = document.querySelector('button[name="pokepasteExport"]');
   if (!pokePasteButton) return;
 
-  const neoPasteButton = document.createElement('button');
-  neoPasteButton.id = 'neopaste-export-button';
-  neoPasteButton.className = 'button exportbutton';
-  neoPasteButton.type = 'button';
-  neoPasteButton.innerHTML = '<i class="fa fa-upload"></i> Upload to NeoPaste';
+  const pokeShareButton = document.createElement('button');
+  pokeShareButton.id = 'pokeshare-export-button';
+  pokeShareButton.className = 'button exportbutton';
+  pokeShareButton.type = 'button';
+  pokeShareButton.innerHTML = '<i class="fa fa-upload"></i> Upload to PokeShare';
 
-  neoPasteButton.onclick = async () => {
+  pokeShareButton.onclick = async () => {
     const title = document.querySelector('.teamnameedit')?.value || 'Untitled';
     const content = buildExportTextFromDOM();
     const authorSpan = document.querySelector('.usernametext');
     const author = authorSpan ? authorSpan.textContent.trim() : 'Anonymous';
 
-    const payload = [{
-      id: Math.random().toString(36).substring(2, 8),
+    // Generate a unique ID for the paste
+    const id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    const payload = {
+      id,
       title,
       content,
       author,
       created_at: new Date().toISOString()
-    }];
+    };
 
-    console.log('Uploading:\n', payload[0].content);
+    console.log('Uploading to PokeShare:\n', payload.content);
 
     try {
-      const response = await fetch('https://psext.agastyawastaken.workers.dev/', {
+      // Upload to Firebase Realtime Database via your worker or directly
+      const response = await fetch('https://pokeshare-upload.agastyawastaken.workers.dev/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -131,46 +135,55 @@ function createNeoPasteButton() {
       if (!response.ok) {
         const error = await response.text();
         console.error('Upload failed:', error);
+        alert('Failed to upload to PokeShare. Please try again.');
         return;
       }
 
-      const pasteUrl = `https://izyawastaken.github.io/NeoPaste/view.html?id=${payload[0].id}`;
+      const pasteUrl = `https://izyawastaken.github.io/PokeShare/view.html?id=${id}`;
       await navigator.clipboard.writeText(pasteUrl);
       console.log(`✅ Uploaded & link copied: ${pasteUrl}`);
       window.open(pasteUrl, '_blank');
     } catch (err) {
       console.error('Upload error:', err);
+      alert('Error uploading to PokeShare. Please check your connection.');
     }
   };
 
-  pokePasteButton.parentElement.insertBefore(neoPasteButton, pokePasteButton.nextSibling);
+  pokePasteButton.parentElement.insertBefore(pokeShareButton, pokePasteButton.nextSibling);
 }
 
 // === PASTE-TO-IMPORT ===
 document.addEventListener('paste', async (e) => {
   const pasteText = (e.clipboardData || window.clipboardData).getData('text');
-  const match = pasteText.match(/neopaste.*[?&]id=([a-z0-9]+)/i);
+  // Support both PokeShare and legacy NeoPaste URLs
+  const match = pasteText.match(/(?:pokeshare|neopaste).*[?&]id=([a-z0-9]+)/i);
   if (match) {
     e.preventDefault();
     const id = match[1];
     try {
-      const response = await fetch(`https://psext.agastyawastaken.workers.dev/?id=${id}`);
+      // Try PokeShare endpoint first, fall back to NeoPaste
+      let response = await fetch(`https://pokeshare-fetch.agastyawastaken.workers.dev/?id=${id}`);
+      if (!response.ok) {
+        // Fallback to old NeoPaste endpoint for legacy pastes
+        response = await fetch(`https://psext.agastyawastaken.workers.dev/?id=${id}`);
+      }
       if (!response.ok) throw new Error('Fetch failed');
       const data = await response.json();
       const team = data.content || '';
       const textarea = document.querySelector('.teamedit textarea');
       if (textarea) {
         textarea.value = team.trim();
-        console.log('✅ NeoPaste imported');
+        console.log('✅ Paste imported from PokeShare');
       }
     } catch (err) {
       console.error('Import failed:', err);
+      alert('Failed to import paste. Please check the URL.');
     }
   }
 });
 
 const observer = new MutationObserver(() => {
-  createNeoPasteButton();
+  createPokeShareButton();
 });
 observer.observe(document.body, { childList: true, subtree: true });
 
@@ -190,20 +203,22 @@ function injectScriptFile(filePath) {
   document.documentElement.appendChild(script);
 }
 
-// Inject the page-context script (required for modifying window.setdex)
-injectScriptFile('injected.js');
+// Inject the page-context script ONLY on calculator (required for modifying window.setdex)
+if (window.location.hostname === 'calc.pokemonshowdown.com') {
+  injectScriptFile('injected.js');
+}
 
 (function () {
   try {
-    const isNeoPasteViewer =
+    const isPokeShareViewer =
       (window.location.hostname === 'izyawastaken.github.io' && 
-       (window.location.pathname.includes('/NeoPaste/view.html') || 
-        window.location.pathname.includes('/PokeShare/view.html'))) ||
+       (window.location.pathname.includes('/PokeShare/view.html') || 
+        window.location.pathname.includes('/NeoPaste/view.html'))) ||
       (window.location.hostname.endsWith('.vercel.app') && 
        window.location.pathname.includes('view.html')) ||
       (window.location.protocol === 'file:' &&
         window.location.pathname.replace(/\\/g, '/').toLowerCase().endsWith('/projects/neo-showdown/view.html'));
-    if (isNeoPasteViewer) {
+    if (isPokeShareViewer) {
       const meta = document.createElement('meta');
       meta.name = 'neoShowdownExtPresent';
       meta.content = 'true';
@@ -216,16 +231,24 @@ injectScriptFile('injected.js');
   if (window.location.hostname !== 'calc.pokemonshowdown.com') return;
 
   const params = new URLSearchParams(window.location.search);
-  const neoPasteToken = params.get('neopaste');
   const pokeShareToken = params.get('pokeShare');
-  const token = neoPasteToken || pokeShareToken;
-  const source = neoPasteToken ? 'NeoPaste' : 'PokeShare';
+  const neoPasteToken = params.get('neopaste'); // Legacy support
+  const token = pokeShareToken || neoPasteToken;
+  const source = pokeShareToken ? 'PokeShare' : 'NeoPaste';
   if (!token) return;
 
-  fetch(`https://neocalc.agastyawastaken.workers.dev/get?token=${encodeURIComponent(token)}`)
+  // Try PokeShare endpoint first, fall back to NeoPaste
+  fetch(`https://pokeshare-calc.agastyawastaken.workers.dev/get?token=${encodeURIComponent(token)}`)
+    .then(res => {
+      if (!res.ok && neoPasteToken) {
+        // Fallback to old NeoPaste endpoint
+        return fetch(`https://neocalc.agastyawastaken.workers.dev/get?token=${encodeURIComponent(token)}`);
+      }
+      return res;
+    })
     .then(res => res.ok ? res.text() : Promise.reject('Not found'))
     .then(setText => {
-      console.log('✅ Fetched NeoPaste: ', setText);
+      console.log(`✅ Fetched from ${source}: `, setText);
 
       const lines = setText.split('\n').map(l => l.trim()).filter(l => l); 
       const speciesLine = lines[0] || '';

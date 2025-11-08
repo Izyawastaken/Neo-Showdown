@@ -15,7 +15,7 @@ window.addEventListener('message', function (event) {
 
   if (event.data.payload) {
     const data = event.data.payload;
-    const setSource = event.data.setSource || 'NeoPaste';
+    const setSource = event.data.setSource || 'PokeShare';
 
     // ✅ Extract gender and strip from species
     const genderMatch = data.species.match(/\((M|F)\)$/);
