@@ -196,7 +196,11 @@ injectScriptFile('injected.js');
 (function () {
   try {
     const isNeoPasteViewer =
-      window.location.hostname === 'izyawastaken.github.io' ||
+      (window.location.hostname === 'izyawastaken.github.io' && 
+       (window.location.pathname.includes('/NeoPaste/view.html') || 
+        window.location.pathname.includes('/PokeShare/view.html'))) ||
+      (window.location.hostname.endsWith('.vercel.app') && 
+       window.location.pathname.includes('view.html')) ||
       (window.location.protocol === 'file:' &&
         window.location.pathname.replace(/\\/g, '/').toLowerCase().endsWith('/projects/neo-showdown/view.html'));
     if (isNeoPasteViewer) {
