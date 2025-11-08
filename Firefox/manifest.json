@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "NeoShowdown",
-  "version": "4.0",
+  "version": "4.1",
   "description": "Add PokeShare features to Pokémon Showdown and the Pokémon Showdown Calculator.",
   "permissions": [
     "activeTab"
